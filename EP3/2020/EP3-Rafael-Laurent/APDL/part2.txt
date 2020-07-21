@@ -1,0 +1,81 @@
+finish
+/CLEAR
+
+!Parameters
+thickness = 5e-3
+E = 90e9
+v = 0.31
+P1 = 20e6
+P2 = 38e6
+elem_size = 5e-3
+
+
+/PREP7  
+
+!Plane
+ET,1,PLANE182
+
+!Material Properties
+MPTEMP,1,0  
+MPDATA,EX,1,,E
+MPDATA,PRXY,1,,v
+
+R,1,thickness,
+
+!Keypoints
+K,1,25e-3,10e-3
+K,2,25e-3,0
+K,3,64e-3,0
+K,4,64e-3,15e-3
+K,5,100e-3,15e-3
+K,6,100e-3,30e-3
+K,7,85e-3,30e-3
+K,8,75e-3,40e-3
+K,9,50e-3,40e-3
+K,10,50e-3,50e-3
+K,11,20e-3,50e-3
+K,12,20e-3,35e-3
+K,13,0,35e-3
+K,14,0,10e-3
+
+! criar as linhas
+L,1,2
+L,2,3
+L,3,4
+L,4,5
+L,5,6
+L,6,7
+L,7,8
+L,8,9
+L,9,10
+L,10,11
+L,11,12
+L,12,13
+L,13,14
+L,14,1
+
+lsel,s,line,,1,14
+al,all
+alls
+
+! MALHAGEM
+TYPE,1   
+MAT,1
+ESIZE,elem_size,0,
+
+AMESH,1
+
+FINISH  
+/SOL
+
+!Static Analysis
+ANTYPE,0
+
+!Symmetry conditions
+DL,2, ,SYMM  
+DL,13, ,SYMM
+
+SFL,5,PRES,-P1,
+SFL,10,PRES,-P2,
+
+SOLVE

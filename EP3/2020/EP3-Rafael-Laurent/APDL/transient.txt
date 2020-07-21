@@ -1,0 +1,218 @@
+finish
+/clear
+/PREP7
+/COM,  Structural
+
+!Parameters
+F = 8000
+D = 2000
+L1 = 2
+L2 = 3
+L3 = 4
+v = 0.29
+E = 210E9
+rho = 7650
+d1i = 0.072
+d1e = 0.08
+d2i = 0.09
+d2e = 0.1
+
+pi = 3.141592653
+A1 = pi*( (d1e/2)**2 - (d1i/2)**2 )
+A2 = pi*( (d2e/2)**2 - (d2i/2)**2 )
+Izz1 = pi*( d1e**4 - d1i**4 )/64
+Izz2 = pi*( d2e**4 - d2i**4 )/64
+
+!Beam
+ET,1,BEAM3
+
+!Material Properties  
+MPTEMP,1,0  
+MPDATA,DENS,1,,rho
+MPDATA,EX,1,,E
+MPDATA,PRXY,1,,v
+
+!Sections
+SECTYPE,   1, BEAM, CTUBE, smallBeam, 0  
+SECOFFSET, CENT 
+SECDATA,d1i/2,d1e/2,20,0,0,0,0,0,0,0
+SECTYPE,   2, BEAM, CTUBE, bigBeam, 0  
+SECOFFSET, CENT 
+SECDATA,d2i/2,d2e/2,20,0,0,0,0,0,0,0
+
+!Real constants
+R,1,A1,Izz1,d1e,0,0,0, 
+R,2,A2,Izz2,d2e,0,0,0, 
+
+!Keypoints
+K,1,0,0,, 
+K,2,L3,0,,   
+K,3,(L3-L1)/4,L2,,  
+K,4,L3-(L3-L1)/4,L2,,
+K,5,(L3-L1)/2,2*L2,,
+K,6,L3-(L3-L1)/2,2*L2,,
+K,7,(L3-L1)/2,2*L2+L1,,
+K,8,L3-(L3-L1)/2,2*L2+L1,,
+K,9,(L3-L1)/2,2*L2+L1*2,,
+K,10,L3-(L3-L1)/2,2*L2+L1*2,,
+K,11,(L3-L1)/2,2*L2+L1*3,,
+K,12,L3-(L3-L1)/2,2*L2+L1*3,,
+K,13,(L3-L1)/2,2*L2+L1*4,,
+K,14,L3-(L3-L1)/2,2*L2+L1*4,,
+
+!Lines
+LSTR,1,2    !Outer Lines
+LSTR,2,4
+LSTR,4,6
+LSTR,6,8
+LSTR,8,10
+LSTR,10,12
+LSTR,12,14
+LSTR,13,14
+LSTR,11,13
+LSTR,9,11
+LSTR,7,9
+LSTR,5,7
+LSTR,3,5
+LSTR,1,3
+
+LSTR,1,4    !Inner Lines
+LSTR,2,3
+LSTR,3,4
+LSTR,3,6
+LSTR,4,5
+LSTR,5,6
+LSTR,5,8
+LSTR,7,8
+LSTR,8,9
+LSTR,9,10
+LSTR,9,12
+LSTR,11,12
+LSTR,12,13
+
+!Meshing
+LESIZE,ALL, , ,10, ,1, , ,1,
+
+TYPE,1      !Beam style BIG
+MAT,1
+SECNUM,2
+REAL,2
+LMESH,1,14,1
+
+TYPE,1      !Beam style SMALL
+MAT,1
+SECNUM,1
+REAL,1
+LMESH,15,27,1
+
+!Degees of freedom
+/GO
+DK,1, , , ,0,UX,UY, , , , ,  
+DK,2, , , ,0,UY, , , , ,
+
+!Transient analysis
+/SOLU   
+ANTYPE,4
+
+!Analysis param
+NSUBST,100,0,0
+ALPHAD,0.3  
+BETAD,0.03
+TIME,10
+OUTRES,ALL,ALL  
+
+!F1
+*DEL,_FNCNAME   
+*DEL,_FNCMTID   
+*SET,_FNCNAME,'f1'  
+*DIM,%_FNCNAME%,TABLE,6,8,1,,,,%_FNCCSYS%   
+! Begin of equation: -8000*sin(2*{PI}*{TIME})   
+*SET,%_FNCNAME%(0,0,1), 0.0, -999   
+*SET,%_FNCNAME%(2,0,1), 0.0 
+*SET,%_FNCNAME%(3,0,1), 0.0 
+*SET,%_FNCNAME%(4,0,1), 0.0 
+*SET,%_FNCNAME%(5,0,1), 0.0 
+*SET,%_FNCNAME%(6,0,1), 0.0 
+*SET,%_FNCNAME%(0,1,1), 1.0, -1, 0, 2, 0, 0, 0  
+*SET,%_FNCNAME%(0,2,1), 0.0, -2, 0, 3.14159265358979312, 0, 0, -1   
+*SET,%_FNCNAME%(0,3,1),   0, -3, 0, 1, -1, 3, -2
+*SET,%_FNCNAME%(0,4,1), 0.0, -1, 0, 1, -3, 3, 1 
+*SET,%_FNCNAME%(0,5,1), 0.0, -1, 9, 1, -1, 0, 0 
+*SET,%_FNCNAME%(0,6,1), 0.0, -2, 0, -8000, 0, 0, -1 
+*SET,%_FNCNAME%(0,7,1), 0.0, -3, 0, 1, -2, 3, -1
+*SET,%_FNCNAME%(0,8,1), 0.0, 99, 0, 1, -3, 0, 0 
+! End of equation: -8000*sin(2*{PI}*{TIME}) 
+
+!F2
+*DEL,_FNCNAME   
+*DEL,_FNCMTID   
+*SET,_FNCNAME,'f2'
+*DIM,%_FNCNAME%,TABLE,6,3,4,,,,%_FNCCSYS%   
+! Begin of equation: {TIME} 
+*SET,%_FNCNAME%(0,0,1), 0, -999 
+*SET,%_FNCNAME%(2,0,1), 0.0 
+*SET,%_FNCNAME%(3,0,1), 0.0 
+*SET,%_FNCNAME%(4,0,1), 0.0 
+*SET,%_FNCNAME%(5,0,1), 0.0 
+*SET,%_FNCNAME%(6,0,1), 0.0 
+*SET,%_FNCNAME%(0,1,1), 1.0, 99, 0, 1, 1, 0, 0  
+*SET,%_FNCNAME%(0,2,1),   0 
+*SET,%_FNCNAME%(0,3,1),   0 
+! End of equation: {TIME}   
+!   
+! Begin of equation: 0  
+*SET,%_FNCNAME%(0,0,2), 2, -999 
+*SET,%_FNCNAME%(2,0,2), 0.0 
+*SET,%_FNCNAME%(3,0,2), 0.0 
+*SET,%_FNCNAME%(4,0,2), 0.0 
+*SET,%_FNCNAME%(5,0,2), 0.0 
+*SET,%_FNCNAME%(6,0,2), 0.0 
+*SET,%_FNCNAME%(0,1,2), 1.0, 99, 0, 0, 0, 0, 0  
+*SET,%_FNCNAME%(0,2,2),   0 
+*SET,%_FNCNAME%(0,3,2),   0 
+! End of equation: 0
+!   
+! Begin of equation: 2000   
+*SET,%_FNCNAME%(0,0,3), 8, -999 
+*SET,%_FNCNAME%(2,0,3), 0.0 
+*SET,%_FNCNAME%(3,0,3), 0.0 
+*SET,%_FNCNAME%(4,0,3), 0.0 
+*SET,%_FNCNAME%(5,0,3), 0.0 
+*SET,%_FNCNAME%(6,0,3), 0.0 
+*SET,%_FNCNAME%(0,1,3), 1.0, 99, 0, 2000, 0, 0, 0   
+*SET,%_FNCNAME%(0,2,3),   0 
+*SET,%_FNCNAME%(0,3,3),   0 
+! End of equation: 2000 
+!   
+! Begin of equation: 0  
+*SET,%_FNCNAME%(0,0,4), 60, -999
+*SET,%_FNCNAME%(2,0,4), 0.0 
+*SET,%_FNCNAME%(3,0,4), 0.0 
+*SET,%_FNCNAME%(4,0,4), 0.0 
+*SET,%_FNCNAME%(5,0,4), 0.0 
+*SET,%_FNCNAME%(6,0,4), 0.0 
+*SET,%_FNCNAME%(0,1,4), 1.0, 99, 0, 0, 0, 0, 0  
+*SET,%_FNCNAME%(0,2,4),   0 
+*SET,%_FNCNAME%(0,3,4),   0 
+! End of equation: 0
+
+
+FK,13,FY, %F1%
+FK,14,FY, %F1%
+
+FK,5,FX, %F2%
+FK,7,FX, %F2%
+FK,9,FX, %F2%
+FK,11,FX, %F2%
+FK,13,FX, %F2%
+
+SOlVE
+FINISH
+
+
+
+
+
+
+
+
